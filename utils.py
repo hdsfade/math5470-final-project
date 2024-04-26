@@ -142,18 +142,19 @@ def work(model, dataset, sup_paras, train_result_save_path, pred_result_save_pat
         pd.DataFrame([[train_start_date, r2, mse]]).to_csv(
             pred_result_save_path, index=False, mode='a', header=False)
 
-        # important features
-        result = permutation_importance(
-            best_model, test_features, test_target, n_repeats=2, random_state=42, n_jobs=2)
-        importances = pd.Series(result.importances_mean,
-                                index=test_features.columns)
-        importance_save_path = base_importance_save_path+train_start_date+'.csv'
-        pd.DataFrame([test_features.columns, importances]).to_csv(
-            importance_save_path, index=False, mode='a', header=False)
+        test_start_date = (pd.to_datetime(test_start_date) +
+                           pd.DateOffset(years=1)).strftime("%Y-%m-%d")
+        if test_start_date >= end_date:
+            # important features
+            result = permutation_importance(
+                best_model, test_features, test_target, n_repeats=2, random_state=42, n_jobs=2)
+            importances = pd.Series(result.importances_mean,
+                                    index=test_features.columns)
+            importance_save_path = base_importance_save_path+train_start_date+'.csv'
+            pd.DataFrame([test_features.columns, importances]).to_csv(
+                importance_save_path, index=False, mode='a', header=False)
 
         train_start_date = (pd.to_datetime(
             train_start_date) + pd.DateOffset(years=1)).strftime("%Y-%m-%d")
         valid_start_date = (pd.to_datetime(
             valid_start_date) + pd.DateOffset(years=1)).strftime("%Y-%m-%d")
-        test_start_date = (pd.to_datetime(test_start_date) +
-                           pd.DateOffset(years=1)).strftime("%Y-%m-%d")
