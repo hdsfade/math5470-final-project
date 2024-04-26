@@ -57,8 +57,7 @@ def mse_score(target, pred):
 # validation for fine tune
 def validation(model, sup_pars: dict, X_trn, y_trn, X_vld, y_vld, train_start_date,
                base_model_save_path, base_result_save_path, is_nn=False):
-    print(sup_pars, train_start_date,
-               base_model_save_path, base_result_save_path)
+
     model_save_path = path.join(base_model_save_path, train_start_date)
     result_save_path = path.join(base_result_save_path, train_start_date)
 
@@ -91,6 +90,7 @@ def validation(model, sup_pars: dict, X_trn, y_trn, X_vld, y_vld, train_start_da
     # store best model
     with open(model_save_path, 'wb') as file:
         pickle.dump(best_model, file)
+    return best_model
 
 # read model from file        
 def read_model(model_path):
