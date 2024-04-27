@@ -113,7 +113,7 @@ def evaluate(target, pred):
 
 
 def work(model, dataset, sup_paras, train_result_save_path, pred_result_save_path, base_importance_save_path, base_value_save_path,
-         train_start_date, valid_start_date, test_start_date, end_date, model_with_importance=False):
+         train_start_date, valid_start_date, test_start_date, end_date, model_with_importance=False, is_nn=False):
     while test_start_date < end_date:
         # split the dataset into train, valid, test
         test_end_date = (pd.to_datetime(test_start_date) +
@@ -123,7 +123,7 @@ def work(model, dataset, sup_paras, train_result_save_path, pred_result_save_pat
                                    valid_start_date, test_start_date, test_end_date)
         # validation
         best_model, info = validation(model, sup_paras, train_features, train_target, valid_features, valid_target,
-                                      train_start_date)
+                                      train_start_date, is_nn)
         pd.DataFrame(info).to_csv(train_result_save_path,
                                   index=False, mode='a', header=False)
 
@@ -146,19 +146,20 @@ def work(model, dataset, sup_paras, train_result_save_path, pred_result_save_pat
                            pd.DateOffset(years=1)).strftime("%Y-%m-%d")
         if test_start_date >= end_date:
             # important features
-            if model_with_importance:
-                importances = best_model.feature_importances_
-                importances = pd.Series(importances,
-                                        index=test_features.columns)
-            else:
-                result = permutation_importance(
-                    best_model, test_features, test_target, n_repeats=2, random_state=42, n_jobs=2)
-                importances = pd.Series(result.importances_mean,
-                                        index=test_features.columns)
+            if not is_nn:
+                if model_with_importance:
+                    importances = best_model.feature_importances_
+                    importances = pd.Series(importances,
+                                            index=test_features.columns)
+                else:
+                    result = permutation_importance(
+                        best_model, test_features, test_target, n_repeats=2, random_state=42, n_jobs=2)
+                    importances = pd.Series(result.importances_mean,
+                                            index=test_features.columns)
 
-            importance_save_path = base_importance_save_path+train_start_date+'.csv'
-            pd.DataFrame([test_features.columns, importances]).to_csv(
-                importance_save_path, index=False, mode='a', header=False)
+                importance_save_path = base_importance_save_path+train_start_date+'.csv'
+                pd.DataFrame([test_features.columns, importances]).to_csv(
+                    importance_save_path, index=False, mode='a', header=False)
 
         train_start_date = (pd.to_datetime(
             train_start_date) + pd.DateOffset(years=1)).strftime("%Y-%m-%d")
