@@ -21,11 +21,11 @@ base_pred_value_save_path = f"./results/nn{args.layers}/pred_value"
 train_result_columns = ['date', 'sup paras', 'r2']
 pred_result_columns = ['date', 'r2', 'mse']
 
-start_date = "1957-01-01"  # start date
+start_date = "2020-01-01"  # start date
 end_date = "2020-12-31"  # end date
 train_start_date = start_date
-valid_start_date = "1975-01-01"
-test_start_date = "1987-01-01"
+valid_start_date = "2020-06-01"
+test_start_date = "2020-08-01"
 
 
 def setup_seed(seed):
@@ -78,7 +78,7 @@ class NeuralNetwork(nn.Module):
 
         self.model.add_module('output', nn.Linear(2, 1))
 
-        list(self.model.parameters())[0].device
+        self.model.to(device)
         optimizer = optim.Adam(self.model.parameters(),
                                lr=self.learning_rate, weight_decay=self.l2)
         loss = nn.MSELoss()
@@ -108,7 +108,7 @@ class NeuralNetwork(nn.Module):
                 l = loss(self.model(X), y)
                 optimizer.zero_grad()
 
-                l1_reg = torch.tensor(0.0)
+                l1_reg = torch.tensor(0.0).to(device)
                 for para in self.model.parameters():
                     l1_reg += torch.norm(para, 1)
                 l += self.l1 * l1_reg
@@ -139,8 +139,10 @@ class NeuralNetwork(nn.Module):
         return l / len(valid_loader)
 
     def predict(self, X):
-        X = torch.from_numpy(np.array(X)).float()
-        return self.model(X).detach().squeeze().numpy()
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        X = torch.from_numpy(np.array(X)).float().to(device)
+        y = self.model(X).cpu()
+        return y.detach().squeeze().numpy()
 
 
 print('---------nn--------')
@@ -156,7 +158,7 @@ params = {
     'seed': [10086]
 }
 
-print('GPU is available: ', torch.cuda.is_available()) 
+print('GPU is available: ', torch.cuda.is_available())
 
 work(NeuralNetwork, dataset, params, train_result_save_path, pred_result_save_path, base_importance_save_path, base_pred_value_save_path,
      train_start_date, valid_start_date, test_start_date, end_date, model_with_importance=False, is_nn=True)
