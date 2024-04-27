@@ -1,7 +1,0 @@
-2020-01-01,"{'learning_rate': 0.1, 'max_depth': 1, 'n_estimators': 500, 'random_state': 10086}",-2.57027%
-2020-01-01,"{'learning_rate': 0.1, 'max_depth': 1, 'n_estimators': 800, 'random_state': 10086}",-2.71636%
-2020-01-01,"{'learning_rate': 0.1, 'max_depth': 1, 'n_estimators': 1000, 'random_state': 10086}",-2.57178%
-2020-01-01,"{'learning_rate': 0.1, 'max_depth': 2, 'n_estimators': 500, 'random_state': 10086}",-7.82338%
-2020-01-01,"{'learning_rate': 0.1, 'max_depth': 2, 'n_estimators': 800, 'random_state': 10086}",-12.25630%
-2020-01-01,"{'learning_rate': 0.1, 'max_depth': 2, 'n_estimators': 1000, 'random_state': 10086}",-15.05425%
-2020-01-01,"{'learning_rate': 0.1, 'max_depth': 1, 'n_estimators': 500, 'random_state': 10086}",-2.57027%

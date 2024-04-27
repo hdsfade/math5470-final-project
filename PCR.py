@@ -15,11 +15,11 @@ base_value_save_path = "./results/PCR/pred_value"
 train_result_columns = ['date', 'sup paras', 'r2']
 pred_result_columns = ['date', 'r2', 'mse']
 
-start_date = "2020-01-01"  # start date
+start_date = "1957-01-01"  # start date
 end_date = "2020-12-31"  # end date
 train_start_date = start_date
-valid_start_date = "2020-06-01"
-test_start_date = "2020-08-01"
+valid_start_date = "1975-01-01"
+test_start_date = "1987-01-01"
 
 
 class PCRegressor:
