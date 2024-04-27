@@ -59,6 +59,8 @@ class NeuralNetwork(nn.Module):
         return self
 
     def fit(self, X_trn, y_trn, X_vld, y_vld):
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
         setup_seed(self.seed)
         self.model = nn.Sequential()
         self.model.add_module('input', nn.Linear(
@@ -76,14 +78,17 @@ class NeuralNetwork(nn.Module):
 
         self.model.add_module('output', nn.Linear(2, 1))
 
+        list(self.model.parameters())[0].device
         optimizer = optim.Adam(self.model.parameters(),
                                lr=self.learning_rate, weight_decay=self.l2)
         loss = nn.MSELoss()
         # Convert data to tensors
-        X_trn_tensor = torch.from_numpy(np.array(X_trn)).float()
-        y_trn_tensor = torch.from_numpy(np.array(y_trn)).float().view(-1, 1)
-        X_vld_tensor = torch.from_numpy(np.array(X_vld)).float()
-        y_vld_tensor = torch.from_numpy(np.array(y_vld)).float().view(-1, 1)
+        X_trn_tensor = torch.from_numpy(np.array(X_trn)).float().to(device)
+        y_trn_tensor = torch.from_numpy(
+            np.array(y_trn)).float().view(-1, 1).to(device)
+        X_vld_tensor = torch.from_numpy(np.array(X_vld)).float().to(device)
+        y_vld_tensor = torch.from_numpy(
+            np.array(y_vld)).float().view(-1, 1).to(device)
 
         # Create data loaders
         train_data = torch.utils.data.TensorDataset(X_trn_tensor, y_trn_tensor)
@@ -150,6 +155,8 @@ params = {
     'patience': [5],
     'seed': [10086]
 }
+
+print('GPU is available: ', torch.cuda.is_available()) 
 
 work(NeuralNetwork, dataset, params, train_result_save_path, pred_result_save_path, base_importance_save_path, base_pred_value_save_path,
      train_start_date, valid_start_date, test_start_date, end_date, model_with_importance=False, is_nn=True)
