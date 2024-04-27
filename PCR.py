@@ -28,8 +28,7 @@ class PCRegressor:
         self.n_PCs = n_PCs
         if loss not in ['huber', 'mse']:
             raise AttributeError(
-                f"The loss should be either 'huber' or 'mse', but {
-                    loss} is given"
+                f"The loss should be either 'huber' or 'mse', but {loss} is given"
             )
         else:
             self.loss = loss
