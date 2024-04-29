@@ -21,11 +21,11 @@ base_pred_value_save_path = f"./results/nn{args.layers}/pred_value"
 train_result_columns = ['date', 'sup paras', 'r2']
 pred_result_columns = ['date', 'r2', 'mse']
 
-start_date = "1957-01-01"  # start date
-end_date = "2020-12-31"  # end date
+start_date = "2020-01-01"  # start date
+end_date = "2020-4-30"  # end date
 train_start_date = start_date
-valid_start_date = "1975-01-01"
-test_start_date = "1987-01-01"
+valid_start_date = "2020-08-01"
+test_start_date = "2020-12-31"
 
 
 def setup_seed(seed):
@@ -52,6 +52,7 @@ class NeuralNetwork(nn.Module):
         self.l1 = l1
         self.l2 = l2
         self.batch_size = batch_size
+        self.epochs = epochs
 
     def set_params(self, **params):
         for param in params.keys():
@@ -98,12 +99,10 @@ class NeuralNetwork(nn.Module):
         vld_loader = torch.utils.data.DataLoader(
             vld_data, batch_size=100000, shuffle=False)
 
-        num_epochs = 3
-
         no_improve_time = 0
-        last_loss = 100
-        current_loss = 100
-        for epoch in range(num_epochs):
+        last_loss = None
+        current_loss = None
+        for epoch in range(self.epochs):
             for X, y in train_loader:
                 l = loss(self.model(X), y)
                 optimizer.zero_grad()
@@ -119,13 +118,13 @@ class NeuralNetwork(nn.Module):
             if epoch >= 5:
                 current_loss = self.validation(vld_loader, r2_loss)
 
-                if current_loss > last_loss - 1e-3:
+                if last_loss is not None and current_loss.sum() > last_loss.sum() - 1e-3:
                     no_improve_time += 1
 
             if no_improve_time >= self.patience:
                 return self
-
-            last_loss = current_loss
+            if current_loss is not None:
+                last_loss = current_loss
         return self
 
     def validation(self, valid_loader, loss_func):
@@ -134,7 +133,8 @@ class NeuralNetwork(nn.Module):
 
         with torch.no_grad():
             for X, y in valid_loader:
-                l += loss_func(self.model(X), y)
+                l_tmp= loss_func(self.model(X), y)
+                l += l_tmp.mean()
 
         return l / len(valid_loader)
 
